@@ -1,0 +1,113 @@
+version: "3.8"
+
+services:
+
+  shoppingify_server:
+    container_name: shoppingify_server_${NODE_ENV}
+    image: shoppingify_server_${NODE_ENV}
+    environment:
+    - NODE_ENV=${NODE_ENV}
+    build:
+      context: ./shoppingify-server
+      target: ${NODE_ENV}
+      dockerfile: Dockerfile
+    volumes:
+    - ./shoppingify-server:/shoppingify/server
+    - /shoppingify/server/node_modules
+    ports:
+    - ${PORT}:${PORT}
+    command: npm run start:${NODE_ENV}
+    env_file:
+    - .env
+    networks:
+    - shoppingify
+    depends_on:
+      - mongodb_dev
+      - redis
+    restart: unless-stopped
+  
+  shoppingify_web:
+    container_name: shoppingify_web
+    image: shoppingify_web
+    environment:
+      - NUXT_HOST=${NUXT_HOST}
+      - NUXT_PORT=${NUXT_PORT}
+    build:
+      context: ./shoppingify-web
+      dockerfile: Dockerfile
+    ports:
+      - ${NUXT_PORT}:${NUXT_PORT}
+    volumes:
+    - ./shoppingify-web:/shoppingify/web
+    - /shoppingify/web/node_modules
+    command: yarn dev
+    env_file: .env
+    networks:
+    - shoppingify
+    restart: unless-stopped
+    
+
+  mongodb_dev:
+    container_name: mongodb_dev
+    image: mongo:latest
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_DEV_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_DEV_PASSWORD}
+      - MONGO_INITDB_DATABASE=${MONGO_DEV_DATABASE}
+    volumes:
+    - mongodb_data:/data/db
+    networks:
+    - shoppingify
+    ports:
+    - ${MONGO_DEV_PORT}:${MONGO_DEV_PORT}
+    restart: unless-stopped
+    env_file:
+      - .env
+
+  mongo_express:
+    container_name: mongo_express
+    image: mongo-express
+    environment:
+      - ME_CONFIG_MONGODB_SERVER=mongodb_dev
+      - ME_CONFIG_MONGODB_ENABLE_ADMIN=${ME_ENABLE_ADMIN}
+      - ME_CONFIG_MONGODB_ADMINUSERNAME=${ME_ADMINUSERNAME}
+      - ME_CONFIG_MONGODB_ADMINPASSWORD=${ME_ADMINPASSWORD}
+      - ME_CONFIG_BASICAUTH_USERNAME=${ME_AUTHUSERNAME}
+      - ME_CONFOG_BASICAUTH_PASSWORD=${ME_AUTHPASSWORD}
+    depends_on:
+      - mongodb_dev
+    networks:
+      - shoppingify
+    restart: unless-stopped
+    ports:
+      - ${ME_PORT}:${ME_PORT}
+    env_file:
+      - .env
+
+  redis:
+    container_name: redis
+    image: redis:alpine
+    ports:
+      - ${REDIS_PORT}:${REDIS_PORT}
+    networks:
+      - shoppingify
+    env_file:
+    - .env
+
+  redis-commander:
+    container_name: redis-commander
+    image: rediscommander/redis-commander:latest
+    environment:
+      - REDIS_HOSTS=${REDIS_COMMANDER_HOSTS}
+    ports:
+      - ${REDIS_COMMANDER_PORT}:${REDIS_COMMANDER_PORT}
+    depends_on:
+      - redis
+    networks:
+      - shoppingify
+
+volumes:
+  mongodb_data:
+
+networks:
+  shoppingify:
