@@ -26,25 +26,25 @@ services:
       - redis
     restart: unless-stopped
   
-  shoppingify_web:
-    container_name: shoppingify_web
-    image: shoppingify_web
-    environment:
-      - NUXT_HOST=${NUXT_HOST}
-      - NUXT_PORT=${NUXT_PORT}
-    build:
-      context: ./shoppingify-web
-      dockerfile: Dockerfile
-    ports:
-      - ${NUXT_PORT}:${NUXT_PORT}
-    volumes:
-    - ./shoppingify-web:/shoppingify/web
-    - /shoppingify/web/node_modules
-    command: yarn dev
-    env_file: .env
-    networks:
-    - shoppingify
-    restart: unless-stopped
+  # shoppingify_web:
+  #   container_name: shoppingify_web
+  #   image: shoppingify_web
+  #   environment:
+  #     - NUXT_HOST=${NUXT_HOST}
+  #     - NUXT_PORT=${NUXT_PORT}
+  #   build:
+  #     context: ./shoppingify-web
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - ${NUXT_PORT}:${NUXT_PORT}
+  #   volumes:
+  #   - ./shoppingify-web:/shoppingify/web
+  #   - /shoppingify/web/node_modules
+  #   command: yarn dev
+  #   env_file: .env
+  #   networks:
+  #   - shoppingify
+  #   restart: unless-stopped
     
 
   mongodb_dev:
