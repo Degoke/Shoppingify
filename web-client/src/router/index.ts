@@ -23,11 +23,13 @@ const router = createRouter({
       path: "/login",
       name: "login",
       component: () => import("../views/LoginView.vue"),
+      meta: { guest: true },
     },
     {
       path: "/signup",
       name: "signup",
       component: () => import("../views/SignupView.vue"),
+      meta: { guest: true },
     },
     {
       path: "/dashboard",
@@ -45,7 +47,20 @@ router.beforeEach((to, from, next) => {
       next();
       return;
     }
-    next("/login");
+    next("/");
+  } else {
+    next();
+  }
+});
+
+router.beforeEach((to, from, next) => {
+  if (to.meta.guest) {
+    const auth = useAuthStore();
+    if (auth.isAuthenticated) {
+      next("/dashboard");
+      return;
+    }
+    next();
   } else {
     next();
   }

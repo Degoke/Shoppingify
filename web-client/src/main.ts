@@ -5,6 +5,7 @@ import { apolloClient } from "./apollo-client";
 
 import App from "./App.vue";
 import router from "./router";
+import { useAuthStore } from "./stores/auth";
 
 const app = createApp({
   setup() {
@@ -14,6 +15,7 @@ const app = createApp({
 });
 
 app.use(createPinia());
+
 app.use(router);
 
 app.mount("#app");
